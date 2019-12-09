@@ -3,7 +3,11 @@
     <string-array name="placeArray">
         <item>Webster Hall@Home - Undertale@42.39147@-72.519435@0.000155@0.000482</item>
         <item>Franklin Dining Hall@Can You Really Call This A Hotel, I Didn\'t Receive A Mint On My Pillow Or Anything - Undertale@42.3892375@-72.5225245@0.0002585@0.0003495</item>
-<!--        <item>@@@@@</item>-->
+        <item>Integrative Learning Center@CORE - Undertale@42.391073@-72.5259075@0.0037@0.005645</item>
+        <item>W. E. B. Du Bois Library@Rain On Brick - Katana ZERO@42.3897285@-72.5282585@0.0002125@0.002815</item>
+        <item>Morrill Science Center@Another Medium - Undertale@42.390874@-72.5243985@0.000273@0.0006275</item>
+        <item>Morrill Science Center@Another Medium - Undertale@42.3901505@-72.524410@0.0009955@0.000379</item>
+        <item>Bartlett Hall@It\'s Raining Somewhere Else - Undertale@42.387950@-72.5285365@0.000471@0.0005795</item>
 <!--        <item>@@@@@</item>-->
     </string-array>
 </resources>

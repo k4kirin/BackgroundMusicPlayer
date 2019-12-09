@@ -24,6 +24,8 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 
 import java.util.ArrayList;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class MainActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener, LocationListener{
@@ -186,8 +188,36 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
     }
+    float volume = 1;
+    private void fadeOutStep(float deltaVolume){
+        mediaPlayer.setVolume(volume, volume);
+        volume -= deltaVolume;
+    }
+    private void fadeOut(){
+        final int fadeDuration = 1000; //1 second
+        final int fadeInterval = 100; //0.1 second between fading
+        final float deltaVolume = fadeInterval/fadeDuration;
+        final Timer timer = new Timer(true);
+        TimerTask timerTask = new TimerTask() {
+            @Override
+            public void run() {
+
+                //Do a fade step
+                fadeOutStep(deltaVolume);
+
+                //Cancel and Purge the Timer if the desired volume has been reached
+                if(volume <= 0){
+                    timer.cancel();
+                    timer.purge();
+                }
+            }
+        };
+
+        timer.schedule(timerTask,fadeInterval,fadeInterval);
+    }
     public void playSong(String name){
         if (mediaPlayer != null) {
+            fadeOut();
             mediaPlayer.stop();
             mediaPlayer.release();
         }
@@ -210,13 +240,13 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                     inDefault=false;
                     setter+="Location: "+p.name+"\n Song Name: "+p.songName;
                     if(p.name.equals(currentPlaceName)) break;
-                    playSong(p.name.toLowerCase().replaceAll("\\s+",""));
+                    playSong(p.name.toLowerCase().replaceAll("[ .]",""));
                     currentPlaceName=p.name;
                     break;
                 }
             }
             if(inDefault){
-                setter+="Location: Unknown\n Song Name: Horizon of Light and Shadow - Bravely Default";
+                setter+="Location: On the open roads\n Song Name: Snowy - Undertale";
                 if(!currentPlaceName.equals(""))playSong("defaultsong");
                 currentPlaceName="";
             }
