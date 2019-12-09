@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="placeArray">
+        <item>Webster Hall@Home - Undertale@42.39147@-72.519435@0.000155@0.000482</item>
+        <item>Franklin Dining Hall@Can You Really Call This A Hotel, I Didn\'t Receive A Mint On My Pillow Or Anything - Undertale@42.3892375@-72.5225245@0.0002585@0.0003495</item>
+<!--        <item>@@@@@</item>-->
+<!--        <item>@@@@@</item>-->
+    </string-array>
+</resources>
