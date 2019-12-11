@@ -13,6 +13,8 @@ import android.location.Location;
 import android.os.Build;
 import androidx.core.app.ActivityCompat;
 import android.app.AlertDialog;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -24,8 +26,6 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 
 import java.util.ArrayList;
-import java.util.Timer;
-import java.util.TimerTask;
 
 public class MainActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener, LocationListener{
@@ -36,24 +36,78 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     private GoogleApiClient googleApiClient;
     private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
     private LocationRequest locationRequest;
-    private static final long UPDATE_INTERVAL = 5000, FASTEST_INTERVAL = 5000; // = 5 seconds
+    private static final long UPDATE_INTERVAL = 1000, FASTEST_INTERVAL = 1000; // = 1 seconds
     // lists for permissions
     private ArrayList<String> permissionsToRequest;
     private ArrayList<String> permissionsRejected = new ArrayList<>();
     private ArrayList<String> permissions = new ArrayList<>();
     // integer for permissions results request
     private static final int ALL_PERMISSIONS_RESULT = 1011;
-    ArrayList<Place> placeList = new ArrayList<Place>();
-    String currentPlaceName="";
+    float volume = 1;
+    ArrayList<Place> placeList = new ArrayList<>();
+    Button muteButton = findViewById(R.id.muteButton);
+    boolean mute = false;
+    String currentPlaceName="totallynotanyplaceandnoplacewillhavethisnameeverlikereallyeverpleasenothisislikethebestplaceholderstringicanthinkof";
 
+    public void checkSong(double lat, double longi){
+        String setter="Latitude : " + lat + "\nLongitude : " + longi + "\n";
+        for(Place p: placeList){
+            if (p.isHere(lat,longi)){
+                setter+="Location: "+p.name+"\n Song Name: "+p.songName;
+                locationTv.setText(setter);
+                if(p.name.equals(currentPlaceName)) {
+                    return;
+                }
+                playSong(p.name.toLowerCase().replaceAll("[ .]",""));
+                currentPlaceName=p.name;
+                return;
+            }
+        }
+        setter+="Location: On the open roads\n Song Name: Snowy - Undertale";
+        locationTv.setText(setter);
+        if(!currentPlaceName.equals(""))playSong("defaultsong");
+        currentPlaceName="";
+    }
+
+    private void fadeOut(){
+        // i have no clue how long this runs for but it works perfectly
+        for(int i=10000;i>=0;i--){
+            if(!mute){
+                volume=(float)i/(float)10000;
+                mediaPlayer.setVolume(volume, volume);
+            }
+        }
+    }
+    public void playSong(String name){
+
+        if (mediaPlayer!=null) {
+            fadeOut();
+            mediaPlayer.stop();
+            mediaPlayer.release();
+        }
+        volume=1;
+        int resID=getResources().getIdentifier(name,
+                "raw", getPackageName());
+        mediaPlayer = MediaPlayer.create(getApplicationContext(), resID);
+        mediaPlayer.start();
+        mediaPlayer.setLooping(true);
+
+    }
+    public void changeMute(View view){
+        mute = !mute;
+        float muteVolume = mute ? 0 : volume;
+        mediaPlayer.setVolume(muteVolume,muteVolume);
+        String muteText = mute ? "Unmute" : "Mute";
+        muteButton.setText(muteText);
+    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
         String[] stringArray = getResources().getStringArray(R.array.placeArray);
-        for(int i=0;i<stringArray.length;i++){
-            String[] tempArray=stringArray[i].split("@");
+        for (String s : stringArray) {
+            String[] tempArray = s.split("@");
             placeList.add(new Place(tempArray));
         }
 
@@ -68,7 +122,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (permissionsToRequest.size() > 0) {
                 requestPermissions(permissionsToRequest.toArray(
-                        new String[permissionsToRequest.size()]), ALL_PERMISSIONS_RESULT);
+                        new String[0]), ALL_PERMISSIONS_RESULT);
             }
         }
 
@@ -83,7 +137,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         ArrayList<String> result = new ArrayList<>();
 
         for (String perm : wantedPermissions) {
-            if (!hasPermission(perm)) {
+            if (hasPermission(perm)) {
                 result.add(perm);
             }
         }
@@ -93,10 +147,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
     private boolean hasPermission(String permission) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            return checkSelfPermission(permission) == PackageManager.PERMISSION_GRANTED;
+            return checkSelfPermission(permission) != PackageManager.PERMISSION_GRANTED;
         }
 
-        return true;
+        return false;
     }
 
     @Override
@@ -158,10 +212,9 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         location = LocationServices.FusedLocationApi.getLastLocation(googleApiClient);
 
         if (location != null) {
-            String setter="Latitude : " + location.getLatitude() + "\nLongitude : " + location.getLongitude();
-            locationTv.setText(setter);
+//            locationTv.setText("Connected!\nPlease wait while we play a new song...");
+            checkSong(location.getLatitude(),location.getLongitude());
         }
-
         startLocationUpdates();
     }
 
@@ -175,7 +228,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
                 &&  ActivityCompat.checkSelfPermission(this,
                 Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            Toast.makeText(this, "You need to enable permissions to display location !", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "You need to enable permissions to get location (and play dank tunes)!", Toast.LENGTH_SHORT).show();
         }
 
         LocationServices.FusedLocationApi.requestLocationUpdates(googleApiClient, locationRequest, this);
@@ -188,69 +241,12 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
     }
-    float volume = 1;
-    private void fadeOutStep(float deltaVolume){
-        mediaPlayer.setVolume(volume, volume);
-        volume -= deltaVolume;
-    }
-    private void fadeOut(){
-        final int fadeDuration = 1000; //1 second
-        final int fadeInterval = 100; //0.1 second between fading
-        final float deltaVolume = fadeInterval/fadeDuration;
-        final Timer timer = new Timer(true);
-        TimerTask timerTask = new TimerTask() {
-            @Override
-            public void run() {
 
-                //Do a fade step
-                fadeOutStep(deltaVolume);
-
-                //Cancel and Purge the Timer if the desired volume has been reached
-                if(volume <= 0){
-                    timer.cancel();
-                    timer.purge();
-                }
-            }
-        };
-
-        timer.schedule(timerTask,fadeInterval,fadeInterval);
-    }
-    public void playSong(String name){
-        if (mediaPlayer != null) {
-            fadeOut();
-            mediaPlayer.stop();
-            mediaPlayer.release();
-        }
-        int resID=getResources().getIdentifier(name,
-                "raw", getPackageName());
-        mediaPlayer = MediaPlayer.create(getApplicationContext(), resID);
-        mediaPlayer.start();
-        mediaPlayer.setLooping(true);
-
-    }
     @Override
     public void onLocationChanged(Location location) {
         if (location != null) {
-            double lat=location.getLatitude();
-            double longi=location.getLongitude();
-            boolean inDefault=true;
-            String setter="Latitude : " + lat + "\nLongitude : " + longi + "\n";
-            for(Place p: placeList){
-                if (p.isHere(lat,longi)){
-                    inDefault=false;
-                    setter+="Location: "+p.name+"\n Song Name: "+p.songName;
-                    if(p.name.equals(currentPlaceName)) break;
-                    playSong(p.name.toLowerCase().replaceAll("[ .]",""));
-                    currentPlaceName=p.name;
-                    break;
-                }
-            }
-            if(inDefault){
-                setter+="Location: On the open roads\n Song Name: Snowy - Undertale";
-                if(!currentPlaceName.equals(""))playSong("defaultsong");
-                currentPlaceName="";
-            }
-            locationTv.setText(setter);
+//            locationTv.setText("Found new location!\nPlease wait while we play a new song...");
+            checkSong(location.getLatitude(),location.getLongitude());
         }
     }
 
@@ -259,7 +255,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         switch(requestCode) {
             case ALL_PERMISSIONS_RESULT:
                 for (String perm : permissionsToRequest) {
-                    if (!hasPermission(perm)) {
+                    if (hasPermission(perm)) {
                         permissionsRejected.add(perm);
                     }
                 }
