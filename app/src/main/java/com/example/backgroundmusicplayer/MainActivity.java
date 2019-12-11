@@ -45,7 +45,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     private static final int ALL_PERMISSIONS_RESULT = 1011;
     float volume = 1;
     ArrayList<Place> placeList = new ArrayList<>();
-    Button muteButton = findViewById(R.id.muteButton);
+    Button muteButton;
     boolean mute = false;
     String currentPlaceName="totallynotanyplaceandnoplacewillhavethisnameeverlikereallyeverpleasenothisislikethebestplaceholderstringicanthinkof";
 
@@ -113,6 +113,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
         locationTv = findViewById(R.id.location);
         locationTv.setText("Finding...");
+        muteButton = findViewById(R.id.muteButton);
         // we add permissions we need to request location of the users
         permissions.add(Manifest.permission.ACCESS_FINE_LOCATION);
         permissions.add(Manifest.permission.ACCESS_COARSE_LOCATION);
