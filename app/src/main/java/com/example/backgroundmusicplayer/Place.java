@@ -6,10 +6,22 @@ public class Place {
     public Place(String[] strArr){
         name=strArr[0];
         songName=strArr[1];
-        this.latCenter = Double.parseDouble(strArr[2]);
-        this.longCenter = Double.parseDouble(strArr[3]);
-        this.latLength = Double.parseDouble(strArr[4]);
-        this.longLength = Double.parseDouble(strArr[5]);
+        if(Double.parseDouble(strArr[5])>=0){
+            this.latCenter = Double.parseDouble(strArr[2]);
+            this.longCenter = Double.parseDouble(strArr[3]);
+            this.latLength = Double.parseDouble(strArr[4]);
+            this.longLength = Double.parseDouble(strArr[5]);
+        }
+        else{
+            double lat1 = Double.parseDouble(strArr[2]);
+            double lat2 = Double.parseDouble(strArr[3]);
+            double longi1 = Double.parseDouble(strArr[4]);
+            double longi2 = Double.parseDouble(strArr[5]);
+            this.latCenter = (lat1+lat2)/2;
+            this.longCenter = (longi1+longi2)/2;
+            this.latLength = Math.abs(latCenter-lat1);
+            this.longLength = Math.abs(longCenter-longi1);
+        }
     }
     public Place(String name, String songName, double latCenter, double longCenter, double latLength, double longLength) {
         this.name = name;

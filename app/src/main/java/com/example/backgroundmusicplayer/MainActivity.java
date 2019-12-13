@@ -58,7 +58,14 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 if(p.name.equals(currentPlaceName)) {
                     return;
                 }
-                playSong(p.name.toLowerCase().replaceAll("[ .]",""));
+                if(p.name.equals("My Room") && currentPlaceName.equals("Webster Hall")){
+                    shiftSong(p.name);
+                }
+                else if(p.name.equals("Webster Hall") && currentPlaceName.equals("My Room")){
+                    shiftSong(p.name);
+                }
+                else
+                    playSong(p.name);
                 currentPlaceName=p.name;
                 return;
             }
@@ -79,19 +86,34 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         }
     }
     public void playSong(String name){
-
+        String fileName=name.toLowerCase().replaceAll("[ .]","");
         if (mediaPlayer!=null) {
             fadeOut();
             mediaPlayer.stop();
             mediaPlayer.release();
         }
         volume=1;
-        int resID=getResources().getIdentifier(name,
+        int resID=getResources().getIdentifier(fileName,
                 "raw", getPackageName());
         mediaPlayer = MediaPlayer.create(getApplicationContext(), resID);
         mediaPlayer.start();
         mediaPlayer.setLooping(true);
 
+    }
+    public void shiftSong(String name){
+        String fileName=name.toLowerCase().replaceAll("[ .]","");
+        int curTime = 0;
+        if (mediaPlayer!=null) {
+            curTime = mediaPlayer.getCurrentPosition();
+            mediaPlayer.stop();
+            mediaPlayer.release();
+        }
+        int resID = getResources().getIdentifier(fileName,
+                "raw", getPackageName());
+        mediaPlayer = MediaPlayer.create(getApplicationContext(), resID);
+        mediaPlayer.seekTo(curTime);
+        mediaPlayer.start();
+        mediaPlayer.setLooping(true);
     }
     public void changeMute(View view){
         mute = !mute;
